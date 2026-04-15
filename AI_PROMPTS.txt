@@ -1,0 +1,14 @@
+1. Prompt arsitektur backend
+Bangun desain backend Spring Boot untuk aplikasi "Vigi-Gate: Smart Visitor & Risk Profiler" dengan Java 17, MySQL, dan REST API. Saya butuh entity visitor log, DTO request/response, repository JPA, service risk scoring berdasarkan jam kunjungan dan frekuensi 7 hari terakhir, endpoint dashboard overview, endpoint checkout, dan generator summary harian.
+
+2. Prompt algoritma risk scoring
+Bantu saya membuat algoritma risk scoring sederhana namun presentable untuk sistem visitor management. Input utama: jam kunjungan dan jumlah kunjungan tamu yang sama dalam 7 hari terakhir. Output: risk score 0-100, label Green/Yellow/Red, dan alasan singkat yang bisa ditampilkan di UI.
+
+3. Prompt summary report AI simulation
+Buatkan logic "AI summary report" tanpa LLM eksternal untuk merangkum kunjungan hari ini. Saya butuh headline, highlight utama, rekomendasi operasional, dan narasi singkat berdasarkan total kunjungan, distribusi Green/Yellow/Red, tamu aktif, jam tersibuk, dan pola kunjungan berulang.
+
+4. Prompt frontend Angular
+Bangun dashboard Angular standalone untuk project Vigi-Gate dengan layout yang terasa modern dan berbeda dari dashboard default. Saya butuh form registrasi tamu, preview foto mock/upload, metric cards, active visitor log dengan tombol checkout, recent visits, dan tombol generate summary. Styling harus responsif, hangat, dan cocok untuk presentasi interview.
+
+5. Prompt dokumentasi dan demo
+Tuliskan README project interview yang menjelaskan stack Java + Angular + MySQL Laragon, langkah menjalankan backend dan frontend, daftar endpoint penting, skenario demo 5-7 menit, dan alasan kenapa data seed demo membantu menunjukkan fitur risk scoring dengan cepat.

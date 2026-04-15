@@ -1,0 +1,42 @@
+:root {
+  color-scheme: light;
+  font-family: Aptos, "Segoe UI Variable Text", "Trebuchet MS", sans-serif;
+  background:
+    radial-gradient(circle at 0% 0%, rgba(240, 201, 135, 0.28), transparent 24%),
+    radial-gradient(circle at 100% 10%, rgba(18, 96, 94, 0.12), transparent 28%),
+    radial-gradient(circle at 80% 100%, rgba(240, 201, 135, 0.16), transparent 26%),
+    #f4ece1;
+  color: #18353c;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  min-height: 100vh;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0)),
+    radial-gradient(circle at top left, rgba(255, 255, 255, 0.28), transparent 22%);
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+}
+
+::selection {
+  background: rgba(21, 94, 97, 0.18);
+  color: #133840;
+}

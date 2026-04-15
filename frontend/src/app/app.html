@@ -1,0 +1,429 @@
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-copy">
+        <p class="sidebar-label">Visitor Control</p>
+        <h1>Vigi-Gate</h1>
+        <p class="sidebar-subtitle">Smart visitor and risk profiler</p>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      @for (item of navigationItems; track item.id) {
+        <button
+          type="button"
+          class="nav-item"
+          [class.active]="isSection(item.id)"
+          (click)="openSection(item.id)">
+          <strong>{{ item.label }}</strong>
+        </button>
+      }
+    </nav>
+  </aside>
+
+  <main class="workspace">
+    <header class="topbar">
+      <div class="topbar-main">
+        <div>
+          <p class="topbar-kicker">Visitor Control</p>
+          <h2>{{ sectionHeading().title }}</h2>
+          <p class="topbar-copy">{{ sectionHeading().description }}</p>
+        </div>
+
+        <div class="topbar-side">
+          <div class="topbar-clock">
+            <span>Realtime</span>
+            <strong>{{ currentTimeLabel() }}</strong>
+            <small>{{ currentDayLabel() }}, {{ currentCalendarLabel() }}</small>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    @if (errorMessage()) {
+      <section class="banner error-banner">{{ errorMessage() }}</section>
+    }
+
+    @if (successMessage()) {
+      <section class="banner success-banner">{{ successMessage() }}</section>
+    }
+
+    @if (isSection('dashboard')) {
+      <section class="content-grid dashboard-grid">
+        <article class="panel dashboard-log-panel">
+          <div class="panel-head">
+            <div>
+              <span class="panel-kicker">Live log</span>
+              <h3>Tamu aktif</h3>
+            </div>
+
+            <div class="panel-actions">
+              <button type="button" class="primary-button" (click)="openSection('register')">Tambah Tamu</button>
+              <button type="button" class="ghost-button" (click)="refreshOverview()">Refresh</button>
+            </div>
+          </div>
+
+          @if (overview(); as overviewData) {
+            @if (overviewData.activeLogs.length > 0) {
+              <div class="log-table">
+                <div class="log-row log-head">
+                  <span>Tamu</span>
+                  <span>Tujuan</span>
+                  <span>Risk</span>
+                  <span>Durasi</span>
+                  <span>Aksi</span>
+                </div>
+                @for (visitor of overviewData.activeLogs; track visitor.id) {
+                  <div class="log-row">
+                    <div class="visitor-cell">
+                      <img [src]="visitor.photoDataUrl" [alt]="visitor.visitorName">
+                      <div>
+                        <strong>{{ visitor.visitorName }}</strong>
+                        <p>{{ maskNik(visitor.nik) }}</p>
+                      </div>
+                    </div>
+
+                    <div>
+                      <strong>{{ visitor.destination }}</strong>
+                      <p>{{ visitor.purpose }}</p>
+                    </div>
+
+                    <div>
+                      <span class="badge" [ngClass]="levelClass(visitor.riskLevel)">{{ levelLabel(visitor.riskLevel) }}</span>
+                      <p>{{ visitor.riskScore }}/100</p>
+                    </div>
+
+                    <div>
+                      <strong>{{ formatDuration(visitor.durationMinutes) }}</strong>
+                      <p>{{ formatDate(visitor.visitTime) }}</p>
+                    </div>
+
+                    <div class="action-stack">
+                      <span class="state-pill" [ngClass]="visitStatusClass(visitor.visitStatus)">{{ visitStatusLabel(visitor.visitStatus) }}</span>
+                      <button type="button" class="secondary-button" (click)="checkoutVisitor(visitor.id)">Checkout</button>
+                    </div>
+                  </div>
+                }
+              </div>
+            } @else {
+              <div class="empty-state">
+                <strong>Tidak ada tamu aktif.</strong>
+                <p>Semua kunjungan yang masih berjalan akan muncul di sini.</p>
+              </div>
+            }
+          }
+        </article>
+
+        <article class="panel spotlight-panel">
+          <div class="panel-head">
+            <div>
+              <span class="panel-kicker">Hari ini</span>
+              <h3>Ringkasan operasional</h3>
+            </div>
+            <span class="panel-chip">{{ servicePosture().title }}</span>
+          </div>
+
+          <p class="spotlight-copy">{{ executiveSnapshot() }}</p>
+
+          @if (overview(); as overviewData) {
+            <div class="metric-grid">
+              <div class="metric-card">
+                <span>Total</span>
+                <strong>{{ overviewData.todayTotal }}</strong>
+              </div>
+              <div class="metric-card">
+                <span>Aktif</span>
+                <strong>{{ overviewData.activeVisitors }}</strong>
+              </div>
+              <div class="metric-card">
+                <span>Selesai</span>
+                <strong>{{ overviewData.checkedOutVisitors }}</strong>
+              </div>
+              <div class="metric-card">
+                <span>Avg risk</span>
+                <strong>{{ overviewData.averageRiskScore }}</strong>
+              </div>
+            </div>
+
+            <div class="distribution-card">
+              <div class="distribution-row">
+                <span>Green</span>
+                <strong>{{ overviewData.riskDistribution.green }}</strong>
+              </div>
+              <div class="bar-track">
+                <span class="bar-fill green" [style.width]="distributionWidth(overviewData.riskDistribution.green, overviewData.todayTotal)"></span>
+              </div>
+
+              <div class="distribution-row">
+                <span>Yellow</span>
+                <strong>{{ overviewData.riskDistribution.yellow }}</strong>
+              </div>
+              <div class="bar-track">
+                <span class="bar-fill yellow" [style.width]="distributionWidth(overviewData.riskDistribution.yellow, overviewData.todayTotal)"></span>
+              </div>
+
+              <div class="distribution-row">
+                <span>Red</span>
+                <strong>{{ overviewData.riskDistribution.red }}</strong>
+              </div>
+              <div class="bar-track">
+                <span class="bar-fill red" [style.width]="distributionWidth(overviewData.riskDistribution.red, overviewData.todayTotal)"></span>
+              </div>
+            </div>
+          } @else {
+            <div class="empty-state">
+              <strong>Dashboard belum aktif.</strong>
+              <p>Hubungkan backend untuk menampilkan data.</p>
+            </div>
+          }
+        </article>
+
+      </section>
+    }
+
+    @if (isSection('register')) {
+      <section class="content-grid register-grid">
+        <article class="panel form-panel">
+          <div class="panel-head">
+            <div>
+              <span class="panel-kicker">Register</span>
+              <h3>Input tamu baru</h3>
+            </div>
+          </div>
+
+          <form class="registration-form" [formGroup]="registrationForm" (ngSubmit)="submitRegistration()">
+            <div class="field-grid">
+              <label class="field">
+                <span>Nama tamu</span>
+                <input type="text" formControlName="visitorName" placeholder="Rian Saputra">
+                @if (invalid('visitorName')) {
+                  <small>Nama wajib diisi.</small>
+                }
+              </label>
+
+              <label class="field">
+                <span>NIK</span>
+                <input type="text" formControlName="nik" maxlength="16" placeholder="16 digit NIK">
+                @if (invalid('nik')) {
+                  <small>NIK wajib 16 digit.</small>
+                }
+              </label>
+
+              <label class="field">
+                <span>Tujuan</span>
+                <input type="text" formControlName="destination" placeholder="Tower B / Lantai 5">
+                @if (invalid('destination')) {
+                  <small>Tujuan wajib diisi.</small>
+                }
+              </label>
+
+              <label class="field">
+                <span>Keperluan</span>
+                <input type="text" formControlName="purpose" placeholder="Meeting, maintenance, delivery">
+                @if (invalid('purpose')) {
+                  <small>Keperluan wajib diisi.</small>
+                }
+              </label>
+            </div>
+
+            <label class="field">
+              <span>Waktu kedatangan</span>
+              <input type="datetime-local" formControlName="visitTime">
+              @if (invalid('visitTime')) {
+                <small>Waktu wajib diisi.</small>
+              }
+            </label>
+
+            <label class="field">
+              <span>Catatan</span>
+              <textarea formControlName="notes" rows="3" placeholder="Opsional"></textarea>
+              @if (invalid('notes')) {
+                <small>Catatan terlalu panjang.</small>
+              }
+            </label>
+
+            <div class="photo-block">
+              <div class="photo-preview">
+                @if (photoPreview()) {
+                  <img [src]="photoPreview()" alt="Photo preview" class="photo-filled-image">
+                } @else {
+                  <img [src]="defaultPhotoPlaceholder" alt="Placeholder foto" class="photo-placeholder-image">
+                }
+              </div>
+
+              <div class="photo-panel">
+                <div class="photo-actions">
+                  <label class="upload-button">
+                    <input type="file" accept="image/*" (change)="onPhotoSelected($event)">
+                    <span>Unggah foto</span>
+                  </label>
+                  <button type="button" class="secondary-button" (click)="useMockPhoto()">Mock photo</button>
+                  <button type="button" class="ghost-button" (click)="clearPhoto()">Reset</button>
+                </div>
+
+                <p class="photo-hint">Gunakan upload foto atau mock photo untuk kebutuhan registrasi.</p>
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button type="submit" class="primary-button" [disabled]="registering()">
+                {{ registering() ? 'Menyimpan...' : 'Simpan registrasi' }}
+              </button>
+            </div>
+          </form>
+        </article>
+      </section>
+    }
+
+    @if (isSection('history')) {
+      <section class="content-stack">
+        <article class="panel">
+          <div class="panel-head">
+            <div>
+              <span class="panel-kicker">Arsip</span>
+              <h3>Riwayat checkout</h3>
+            </div>
+          </div>
+
+          @if (checkedOutVisits().length > 0) {
+              <div class="visit-grid">
+                @for (visitor of checkedOutVisits(); track visitor.id) {
+                  <article class="visit-card">
+                    <div class="visit-card-head">
+                      <div class="visit-identity">
+                        <img [src]="visitor.photoDataUrl" [alt]="visitor.visitorName">
+                        <div>
+                          <h4>{{ visitor.visitorName }}</h4>
+                          <p>{{ maskNik(visitor.nik) }}</p>
+                        </div>
+                      </div>
+
+                      <span class="badge" [ngClass]="levelClass(visitor.riskLevel)">{{ levelLabel(visitor.riskLevel) }}</span>
+                    </div>
+
+                    <p class="visit-title">{{ visitor.destination }}</p>
+                    <p class="visit-copy">{{ visitor.purpose }}</p>
+                    <p class="visit-time">{{ formatDate(visitor.checkoutTime || visitor.visitTime) }}</p>
+                  </article>
+                }
+              </div>
+          } @else {
+            <div class="empty-state">
+              <strong>Belum ada kunjungan selesai.</strong>
+              <p>Riwayat akan terisi setelah tamu checkout.</p>
+            </div>
+          }
+        </article>
+      </section>
+    }
+
+    @if (isSection('reports')) {
+      <section class="content-grid reports-grid">
+        <article class="panel">
+          <div class="panel-head">
+            <div>
+              <span class="panel-kicker">Laporan</span>
+              <h3>Summary harian</h3>
+            </div>
+            <button type="button" class="primary-button" (click)="generateSummary()" [disabled]="generatingSummary()">
+              {{ generatingSummary() ? 'Menyusun...' : 'Generate summary' }}
+            </button>
+          </div>
+
+          <p class="summary-hint">{{ summaryHint() }}</p>
+
+          @if (summary(); as report) {
+            <div class="summary-card">
+              <div class="summary-meta">
+                <span class="panel-chip">Updated {{ generatedSummaryLabel() }}</span>
+              </div>
+              <h3>{{ report.headline }}</h3>
+              <p>{{ report.narrative }}</p>
+
+              <div class="summary-list">
+                <div>
+                  <h4>Highlights</h4>
+                  <ul>
+                    @for (item of report.highlights; track item) {
+                      <li>{{ item }}</li>
+                    }
+                  </ul>
+                </div>
+
+                <div>
+                  <h4>Recommendations</h4>
+                  <ul>
+                    @for (item of report.recommendations; track item) {
+                      <li>{{ item }}</li>
+                    }
+                  </ul>
+                </div>
+              </div>
+            </div>
+          } @else {
+            <div class="empty-state">
+              <strong>Summary belum dibuat.</strong>
+              <p>Tekan tombol di atas untuk membuat laporan singkat.</p>
+            </div>
+          }
+        </article>
+      </section>
+    }
+
+    @if (isSection('policy')) {
+      <section class="content-grid policy-grid">
+        <article class="panel">
+          <div class="panel-head">
+            <div>
+              <span class="panel-kicker">Risk engine</span>
+              <h3>Aturan screening</h3>
+            </div>
+          </div>
+
+          <p class="summary-hint">Status akhir dibentuk dari gabungan waktu kedatangan, frekuensi 7 hari, dan kunjungan di hari yang sama.</p>
+
+          <div class="rule-grid detail-rule-grid">
+            @for (item of riskDetailCards; track item.label) {
+              <div class="rule-card detail-card" [ngClass]="item.label.toLowerCase()">
+                <div class="rule-card-head">
+                  <span class="badge" [ngClass]="item.label.toLowerCase()">{{ item.label }}</span>
+                  <span class="rule-score">{{ item.score }}</span>
+                </div>
+                <p>{{ item.summary }}</p>
+                <ul class="rule-points">
+                  @for (point of item.points; track point) {
+                    <li>{{ point }}</li>
+                  }
+                </ul>
+                <strong class="rule-action">{{ item.action }}</strong>
+              </div>
+            }
+          </div>
+        </article>
+
+        <article class="panel">
+          <div class="panel-head">
+            <div>
+              <span class="panel-kicker">Threshold</span>
+              <h3>Komponen skor</h3>
+            </div>
+          </div>
+
+          <div class="rule-list scoring-list">
+            @for (group of riskScoreComponents; track group.title) {
+              <div class="rule-item">
+                <strong>{{ group.title }}</strong>
+                <ul class="rule-points">
+                  @for (point of group.points; track point) {
+                    <li>{{ point }}</li>
+                  }
+                </ul>
+              </div>
+            }
+          </div>
+        </article>
+
+      </section>
+    }
+  </main>
+</div>
