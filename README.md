@@ -1,55 +1,34 @@
-# Vigi-Gate: Smart Visitor & Risk Profiler
+# Vigi-Gate
 
-Vigi-Gate adalah sistem registrasi tamu digital untuk kompleks perumahan atau perkantoran. Aplikasi ini mencatat data tamu, menghitung risk score otomatis, menampilkan tamu yang masih berada di area secara real-time, dan menghasilkan summary kunjungan harian dengan simulasi logic AI.
+Sistem registrasi tamu digital dengan risk scoring, live log tamu aktif, dan summary kunjungan harian.
 
 ## Stack
 
-- Backend: Spring Boot 3.5, Java 17, Spring Web, Spring Data JPA
-- Frontend: Angular standalone
+- Backend: Spring Boot 3.5, Java 17
+- Frontend: Angular
 - Database: MySQL Laragon
 
 ## Fitur Utama
 
-- Smart Registration
-  - Input nama, NIK, tujuan, keperluan, jam kunjungan, catatan, dan foto mock/upload.
-- Risk Scoring Engine
-  - Skor dihitung dari jam kunjungan dan frekuensi kunjungan sebelumnya.
-  - Status akhir: `GREEN`, `YELLOW`, `RED`.
-- Real-time Log
-  - Dashboard menampilkan total kunjungan hari ini, tamu aktif, distribusi risiko, dan daftar tamu yang sedang berada di area.
-- AI Summary Report
-  - Tombol `Generate Summary` memanggil backend untuk membuat ringkasan aktivitas, highlight, dan rekomendasi operasional.
+- Registrasi tamu: nama, NIK, tujuan, keperluan, waktu kunjungan, catatan, foto
+- Risk scoring: `GREEN`, `YELLOW`, `RED`
+- Live log: daftar tamu yang masih aktif di area
+- Riwayat: kunjungan yang sudah checkout
+- Summary harian: headline, highlights, recommendations, narrative
 
-## Aturan Risk Score
+## Menjalankan Project
 
-- Green
-  - Jam kunjungan normal dan frekuensi datang masih rendah.
-- Yellow
-  - Datang mendekati jam rawan atau sudah beberapa kali berkunjung.
-- Red
-  - Datang larut malam atau terlalu sering muncul dalam 7 hari terakhir.
+### 1. Jalankan MySQL
 
-## Struktur Project
+Gunakan MySQL dari Laragon dengan konfigurasi default:
 
-- `src/main/java/...`
-  - API Spring Boot, entity visitor log, service risk scoring, summary report, demo seeder.
-- `frontend/`
-  - Dashboard Angular untuk registrasi tamu, active log, dan summary report.
-- `AI_PROMPTS.txt`
-  - Contoh prompt AI agent yang dipakai saat membangun fitur utama.
+- Host: `localhost`
+- Port: `3306`
+- Database: `vigigate_db`
+- Username: `root`
+- Password: kosong
 
-## Cara Menjalankan
-
-### 1. Jalankan MySQL dari Laragon
-
-- Pastikan service MySQL Laragon aktif pada port `3306`.
-- Konfigurasi default backend:
-  - Database: `vigigate_db`
-  - Username: `root`
-  - Password: kosong
-- Database akan dibuat otomatis oleh JPA karena URL memakai `createDatabaseIfNotExist=true`.
-
-Jika username/password MySQL berbeda, jalankan backend dengan environment variable:
+Jika username/password berbeda:
 
 ```powershell
 $env:DB_USERNAME="root"
@@ -58,30 +37,14 @@ $env:DB_PASSWORD="password-anda"
 
 ### 2. Jalankan Backend
 
-Gunakan PowerShell dari folder project:
-
 ```powershell
 $env:MAVEN_USER_HOME="d:\Tes-Berijalan\backend\.m2"
-./mvnw.cmd test
 ./mvnw.cmd spring-boot:run
 ```
 
-Backend akan aktif di:
+Backend: `http://localhost:8080`
 
-- `http://localhost:8080`
-
-Endpoint utama:
-
-- `GET /api/dashboard/overview`
-- `POST /api/visitors`
-- `GET /api/visitors/active`
-- `GET /api/visitors/today`
-- `PATCH /api/visitors/{id}/checkout`
-- `GET /api/reports/today-summary`
-
-### 3. Jalankan Frontend Angular
-
-Buka terminal baru:
+### 3. Jalankan Frontend
 
 ```powershell
 cd frontend
@@ -89,44 +52,16 @@ npm.cmd install
 npm.cmd start
 ```
 
-Frontend akan aktif di:
+Frontend: `http://localhost:4200`
 
-- `http://localhost:4200`
+## Endpoint Utama
 
-## Data Demo
-
-Saat backend pertama kali dijalankan, aplikasi akan mengisi beberapa data awal otomatis jika tabel masih kosong.
-
-Tujuannya:
-
-- Dashboard langsung terisi untuk presentasi.
-- Status Green, Yellow, dan Red lebih mudah didemokan.
-- Tombol summary langsung menghasilkan insight yang relevan.
-
-Jika ingin mematikan seed demo:
-
-```powershell
-$env:APP_SEED_DEMO_DATA="false"
-./mvnw.cmd spring-boot:run
-```
-
-## Skenario Demo Saat Interview
-
-1. Tunjukkan dashboard awal yang sudah berisi data seed.
-2. Jelaskan rules risk scoring berdasarkan jam kunjungan dan frekuensi.
-3. Tambahkan tamu baru pada jam normal untuk menghasilkan `Green`.
-4. Tambahkan tamu yang sama pada jam malam atau beberapa kali untuk memunculkan `Yellow` atau `Red`.
-5. Tunjukkan daftar tamu aktif di `Active Visitor Log`.
-6. Klik `Checkout` untuk memperbarui log real-time.
-7. Klik `Generate Summary` untuk menampilkan ringkasan harian berbasis simulasi AI.
-
-## Verifikasi Yang Sudah Dilakukan
-
-- Backend unit test: `PASS`
-- Frontend Angular build: `PASS`
-- Startup backend dan akses endpoint `GET /api/dashboard/overview`: `HTTP 200`
+- `GET /api/dashboard/overview`
+- `POST /api/visitors`
+- `GET /api/visitors/today`
+- `PATCH /api/visitors/{id}/checkout`
+- `GET /api/reports/today-summary`
 
 ## Catatan
 
-- File `.mvn/maven.config` sudah diarahkan ke local repository workspace supaya dependency Maven tidak menulis ke home directory.
-- Jika port `8080` atau `4200` sedang dipakai aplikasi lain, ubah port sebelum demo.
+- Prompt AI agent yang digunakan ada di [AI_PROMPTS.txt](/d:/Tes-Berijalan/backend/AI_PROMPTS.txt:1).
